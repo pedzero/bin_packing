@@ -15,15 +15,16 @@ class Solver:
             self.bins_capacity = bins_capacity
         self.all_combinations = list(permutations(self.elements))
 
-    def solve_by_index(self, index: int):
+    def solve_by_index(self, index: int) -> bool:
         if index < 0 or index >= len(self.all_combinations):
-            raise IndexError("Index out of range")
+            return False
 
         self.bins = []
 
         combination = self.all_combinations[index]
 
         self.pack_elements(combination)
+        return True
 
     def pack_elements(self, combination):
         current_bin = Bin(self.bins_capacity)
