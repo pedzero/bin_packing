@@ -26,6 +26,12 @@ class Solver:
         self.pack_elements(combination)
         return True
 
+    def solve_all(self):
+        self.bins = []
+
+        for i, combination in enumerate(self.all_combinations):
+            self.pack_elements(combination)
+
     def pack_elements(self, combination):
         current_bin = Bin(self.bins_capacity)
         self.bins.append(current_bin)
@@ -35,3 +41,7 @@ class Solver:
                 current_bin = Bin(self.bins_capacity)
                 self.bins.append(current_bin)
                 current_bin.add_element(element)
+
+        for i, _bin in enumerate(self.bins):
+            if _bin.is_full():
+                self.valid_solutions.append(combination)
