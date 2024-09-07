@@ -1,4 +1,5 @@
 import sys
+import time
 
 import pygame
 
@@ -42,11 +43,14 @@ class View:
         pygame.quit()
         sys.exit()
 
-    def _draw_text(self, text, size, color, coordinates):
+    def _draw_text(self, text, size, color, coordinates, center = True):
         font = pygame.font.SysFont("Arial", size)
         text_obj = font.render(text, True, color)
         text_rect = text_obj.get_rect()
-        text_rect.center = coordinates
+        if center:
+            text_rect.center = coordinates
+        else:
+            text_rect.topleft = coordinates
 
         self.screen.blit(text_obj, text_rect)
 
@@ -92,6 +96,8 @@ class View:
 
             self.screen.fill((200, 200, 200))
 
+            pygame.draw.rect(self.screen, (150, 150, 150), (902, 0, 250, self.height))
+
             if self.current_state == self.states["start"]:
                 self.draw_title(f"S = {{{', '.join(str(element.size) for element in solver.elements)}}}")
 
@@ -106,8 +112,12 @@ class View:
             if self.current_state == self.states["ended"]:
                 self.draw_title("Fim das Soluções")
 
-            self._draw_button("Resolver", 24, (120, 40), self.clr.colors["OCEAN_BLUE"], (1012, 588),
+            self.draw_valid_solution()
+
+            self._draw_button("Resolver", 24, (120, 40), self.clr.colors["OCEAN_BLUE"], (967, 534),
                               self.button_resolve)
+            self._draw_button("Próximo", 24, (120, 40), self.clr.colors["OCEAN_BLUE"], (967, 588),
+                              self.button_step)
 
             self._event()
 
@@ -116,17 +126,22 @@ class View:
 
         pygame.quit()
 
-    def button_resolve(self):
+    def button_step(self):
         if not self.solver.solve_by_index(self.solution_index):
             self.current_state = self.states["ended"]
-            return
+            return False
         self.solution_index += 1
 
         if self.current_state == self.states["start"]:
             self.current_state = self.states["solving"]
+        return True
+
+    def button_resolve(self):
+        while self.button_step():
+            pass
 
     def draw_title(self, text: str):
-        self._draw_text(text, 32, (0, 0, 0), (self.width / 2, 32))
+        self._draw_text(text, 32, (0, 0, 0), (451, 32))
 
     def draw_solution(self):
         bin_color = (10, 20, 30)
@@ -134,14 +149,41 @@ class View:
         gap = 20
         bins = len(self.solver.bins)
         max_size = (bins * (bin_size[0] + (gap - 1)))
-        pos = ((self.width - max_size) / 2, (self.height - bin_size[1]) / 2)
+        pos = ((self.width - max_size - 250) / 2, (self.height - bin_size[1]) / 2)
+
+        pygame.draw.rect(self.screen, (150, 150, 150), (pos[0] - 10, pos[1] - 10, max_size + 5, bin_size[1] + 20))
 
         for i, bin in enumerate(self.solver.bins):
+            if bin.is_full():
+                pygame.draw.rect(self.screen, (0, 100, 50), (pos[0] - 3, pos[1] - 3, bin_size[0] + 6, bin_size[1] + 6))
             pygame.draw.rect(self.screen, bin_color, (pos[0], pos[1], bin_size[0], bin_size[1]))
             element_pos = (pos[0], pos[1] + bin_size[1])
             for j, element in enumerate(self.solver.bins[i].elements):
-                element_pos = (element_pos[0], element_pos[1] - (element.size * bin_size[1]))
-                self._draw_element(str(element.size), 22, (bin_size[0], (element.size * bin_size[1])),
+                element_pos = (element_pos[0], element_pos[1] - (element.size * bin_size[1] / bin.capacity))
+                self._draw_element(str(element.size), 22, (bin_size[0], (element.size * bin_size[1] / bin.capacity)),
                                    self.clr.get_color_as_tuple(element.color), (element_pos[0], element_pos[1]))
 
             pos = (pos[0] + bin_size[0] + gap, pos[1])
+
+    def draw_valid_solution(self):
+        position = (1027, 20)
+        font_size = int(24 - (len(self.solver.elements) / 10) * 20)
+
+        if (len(self.solver.valid_solutions) > 0):
+            self._draw_text(
+                "Soluções Válidas",
+                font_size + 4,
+                (0, 100, 50),
+                position
+            )
+            position = (position[0], position[1] + font_size + 10)
+        for i, solution in enumerate(self.solver.valid_solutions):
+            self._draw_text(
+                f"S = {{{', '.join(str(element.size) for element in self.solver.valid_solutions[i])}}}",
+                font_size,
+                (0, 0, 0),
+                position
+            )
+            position = (position[0], position[1] + font_size + 10)
+            if position[1] > 520:
+                return
