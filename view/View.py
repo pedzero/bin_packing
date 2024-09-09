@@ -177,7 +177,9 @@ class View:
 
     def draw_valid_solution(self):
         position = (1027, 20)
-        font_size = int(24 - (len(self.solver.elements) / 10) * 20)
+        font_size = 0
+        for _, solution in enumerate(self.solver.valid_solutions):
+            font_size = max(font_size, int(24 - (len(solution) / 10) * 20))
 
         if (len(self.solver.valid_solutions) > 0):
             self._draw_text(
