@@ -8,12 +8,18 @@ class Solver:
     bins: list[Bin] = []
     all_combinations: list = []
     valid_solutions: list[bins] = []
+    unique_solutions: set[frozenset] = set()
+
+    filter_solutions: bool = True
 
     def __init__(self, elements_size: list[float], bins_capacity: float):
         for e in elements_size:
             self.elements.append(Element(e))
-            self.bins_capacity = bins_capacity
+        self.bins_capacity = bins_capacity
         self.all_combinations = list(permutations(self.elements))
+
+    def toggle_solution_filter(self):
+        self.filter_solutions = not self.filter_solutions
 
     def solve_by_index(self, index: int) -> bool:
         if index < 0 or index >= len(self.all_combinations):
@@ -22,8 +28,8 @@ class Solver:
         self.bins = []
 
         combination = self.all_combinations[index]
-
         self.pack_elements(combination)
+
         return True
 
     def solve_all(self):
@@ -44,4 +50,10 @@ class Solver:
 
         for i, _bin in enumerate(self.bins):
             if _bin.is_full():
-                self.valid_solutions.append(combination)
+                if not self.filter_solutions:
+                    self.valid_solutions.append(list(_bin.elements))
+                else:
+                    solution_set = frozenset(_bin.elements)
+                    if solution_set not in self.unique_solutions:
+                        self.unique_solutions.add(solution_set)
+                        self.valid_solutions.append(list(_bin.elements))
