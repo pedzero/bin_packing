@@ -56,13 +56,16 @@ class Solver:
         for i, _bin in enumerate(self.bins):
             if _bin.is_full():
                 if not self.filter_solutions:
-                    self.valid_solutions.append(list(_bin.elements))
+                    self.valid_solutions.append(list(self.get_original_values(_bin.elements)))
                 else:
                     solution_set = frozenset(_bin.elements)
                     if solution_set not in self.unique_solutions:
                         self.unique_solutions.add(solution_set)
-                        valid_elements: list[Element] = []
-                        for _, e in enumerate(_bin.elements):
-                            valid_elements.append(self.original[self.elements.index(e)])
+                        self.valid_solutions.append(list(self.get_original_values(_bin.elements)))
 
-                        self.valid_solutions.append(list(valid_elements))
+    def get_original_values(self, elements: list[Element]) -> list[Element]:
+        valid_elements: list[Element] = []
+        for _, e in enumerate(elements):
+            valid_elements.append(self.original[self.elements.index(e)])
+
+        return valid_elements
