@@ -114,9 +114,16 @@ class View:
 
             self.draw_valid_solution()
 
-            self._draw_button("Resolver", 24, (120, 40), self.clr.colors["OCEAN_BLUE"], (967, 534),
+            text = ""
+            if self.solver.filter_solutions:
+                text = "X"
+            self._draw_button(text, 22, (30, 30), (200, 200, 200), (912, 558),
+                              self.toggle_filter)
+            self._draw_text("Filtrar soluções", 22, (0, 0, 0), (950, 560), False)
+
+            self._draw_button("Resolver", 22, (110, 40), (0, 204, 153), (912, 598),
                               self.button_resolve)
-            self._draw_button("Próximo", 24, (120, 40), self.clr.colors["OCEAN_BLUE"], (967, 588),
+            self._draw_button("Próximo", 22, (110, 40), (0, 153, 153), (1032, 598),
                               self.button_step)
 
             self._event()
@@ -139,6 +146,9 @@ class View:
     def button_resolve(self):
         while self.button_step():
             pass
+
+    def toggle_filter(self):
+        self.solver.toggle_solution_filter()
 
     def draw_title(self, text: str):
         self._draw_text(text, 32, (0, 0, 0), (451, 32))
@@ -185,5 +195,5 @@ class View:
                 position
             )
             position = (position[0], position[1] + font_size + 10)
-            if position[1] > 520:
+            if position[1] > 550:
                 return
