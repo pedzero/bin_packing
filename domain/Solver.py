@@ -5,6 +5,7 @@ from domain.Element import Element
 
 class Solver:
     elements: list[Element] = []
+    original: list[Element] = []
     bins: list[Bin] = []
     all_combinations: list = []
     valid_solutions: list[bins] = []
@@ -12,9 +13,13 @@ class Solver:
 
     filter_solutions: bool = True
 
-    def __init__(self, elements_size: list[float], bins_capacity: float):
+    def __init__(self, elements_size: list[float], target: float,  bins_capacity: float):
         for e in elements_size:
-            self.elements.append(Element(e))
+            if e > target:
+                continue
+            self.elements.append(Element(e/target))
+            self.original.append(Element(e, 0xFFFFFF))
+
         self.bins_capacity = bins_capacity
         self.all_combinations = list(permutations(self.elements))
 
@@ -56,4 +61,8 @@ class Solver:
                     solution_set = frozenset(_bin.elements)
                     if solution_set not in self.unique_solutions:
                         self.unique_solutions.add(solution_set)
-                        self.valid_solutions.append(list(_bin.elements))
+                        valid_elements: list[Element] = []
+                        for _, e in enumerate(_bin.elements):
+                            valid_elements.append(self.original[self.elements.index(e)])
+
+                        self.valid_solutions.append(list(valid_elements))
