@@ -1,5 +1,4 @@
 import sys
-import time
 
 import pygame
 
@@ -177,9 +176,9 @@ class View:
 
     def draw_valid_solution(self):
         position = (1027, 20)
-        font_size = 0
+        font_size = 50
         for _, solution in enumerate(self.solver.valid_solutions):
-            font_size = max(font_size, int(24 - (len(solution) / 10) * 20))
+            font_size = min(font_size, int(28 - (len(solution) / 10) * 20))
 
         if (len(self.solver.valid_solutions) > 0):
             self._draw_text(
